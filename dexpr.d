@@ -4,7 +4,7 @@
 // TODO: the caches should use weak references
 
 import std.conv;
-import options, hashtable, util;
+import options, hashtable, util, bounds;
 
 alias Q=TupleX, q=tuplex;
 static import std.typecons;
@@ -1478,6 +1478,9 @@ bool approxEqual(real a,real b){
 
 // TODO: improve these procedures: they are way too naive
 bool couldBeZero(DExpr e){
+	auto a=boundcheckEqZ(e);
+	if(!a.isNull&&!a.get) return false;
+
 	if(cast(DΠ)e) return false;
 	if(cast(DE)e) return false;
 	if(auto c=cast(Dℤ)e) return c.c==0;
@@ -1534,6 +1537,9 @@ bool mustBeZeroOrOne(DExpr e){
 }
 
 bool mustBeLessOrEqualZero(DExpr e){
+	auto a=boundcheckLeZ(e);
+	if(!a.isNull&&a.get) return true;
+
 	bool mustBeLessOrEqualZeroImpl(DExpr e){
 		if(cast(DΠ)e||cast(DE)e) return false;
 		if(auto c=cast(Dℤ)e) return c.c<=0;
@@ -1585,6 +1591,8 @@ bool mustBeLessOrEqualZero(DExpr e){
 	return false;
 }
 bool mustBeLessThanZero(DExpr e){
+	auto a=boundcheckLZ(e);
+	if(!a.isNull&&a.get) return true;
 	return !couldBeZero(e)&&mustBeLessOrEqualZero(e);
 }
 
